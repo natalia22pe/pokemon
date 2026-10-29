@@ -1,0 +1,61 @@
+/* =================================================
+   Estilos y Animaciones para el Catálogo Principal
+   ================================================= */
+
+/* Fondo dinámico fijo en toda la pantalla */
+.background-carousel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -999;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.bg-image {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0.8;
+}
+
+/* Tarjetas principales del catálogo */
+div.card.h-100 {
+    background-color: #13033b !important;
+    border: none !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 1rem 3rem rgba(28, 5, 49, 0.4) !important;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+}
+
+/* Textos dentro de las tarjetas */
+div.card.h-100 .card-title,
+div.card.h-100 p {
+    color: #fdfdfd !important;
+}
+
+/* Efecto interactivo de movimiento al pasar el cursor sobre la tarjeta */
+.transition-card:hover {
+    transform: translateY(-8px) scale(1.02) !important;
+    box-shadow: 0 1.5rem 3.5rem rgba(35, 107, 185, 0.4) !important;
+}
+
+/* Contenedor de la imagen del Pokémon */
+.pokemon-img-container {
+    overflow: hidden;
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+
+/* Mantener colores originales y agregar zoom interactivo a la imagen del Pokémon */
+.pokemon-img {
+    mix-blend-mode: normal !important;
+    opacity: 1 !important;
+    transition: transform 0.5s ease !important;
+}
+
+.transition-card:hover .pokemon-img {
+    transform: scale(1.1) rotate(2deg);
+}

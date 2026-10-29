@@ -1,0 +1,38 @@
+{% extends 'pokeapp/base.html' %}
+{% load static %}
+
+{% block title %}Eliminar {{ pokemon.nombre }} - Pokédex{% endblock %}
+
+{% block content %}
+<div class="background-carousel">
+    <div class="bg-image"></div>
+</div>
+
+<div class="container py-5 position-relative" style="z-index: 2;">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-lg-5 text-center">
+            <div class="card border-0 shadow-lg rounded-4 p-4 text-white" style="background-color: #13033b !important;">
+                <div class="card-body">
+                    <div class="display-4 text-danger mb-3">⚠️</div>
+                    <h2 class="fw-bold text-white mb-3">¿Eliminar registro?</h2>
+                    <p class="text-white-50 mb-4">
+                        ¿Estás segura de que deseas eliminar a <strong class="text-white text-capitalize">{{ pokemon.nombre }}</strong> del sistema? Esta acción no se puede deshacer.
+                    </p>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger rounded-pill fw-bold py-2 shadow-sm">
+                                Sí, Eliminar
+                            </button>
+                            <a href="{% url 'detalle_pokemon' pokemon.id %}" class="btn btn-outline-light rounded-pill py-2 small fw-semibold">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

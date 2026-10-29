@@ -1,0 +1,48 @@
+{% extends 'pokeapp/base.html' %}
+{% load static %}
+
+{% block title %}Editar {{ pokemon.nombre }} - Pokédex{% endblock %}
+
+{% block content %}
+<div class="background-carousel">
+    <div class="bg-image"></div>
+</div>
+
+<div class="container py-5 position-relative" style="z-index: 2;">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-lg-5">
+            <div class="card border-0 shadow-lg rounded-4 p-4 text-white" style="background-color: #13033b !important;">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <span class="badge bg-danger bg-opacity-25 text-white px-3 py-2 rounded-pill fw-semibold mb-2" style="background-color: #b93f23;">Modificar Registro</span>
+                        <h2 class="fw-bold text-white">Editar Pokémon</h2>
+                        <p class="text-white-50 small">Actualiza la información del ejemplar en el sistema.</p>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {% for field in form %}
+                            <div class="mb-3 text-start">
+                                <label class="form-label text-white-50 fw-semibold small">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger small mt-1">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-light text-danger rounded-pill fw-bold py-2 shadow-sm">
+                                Guardar Cambios
+                            </button>
+                            <a href="{% url 'detalle_pokemon' pokemon.id %}" class="btn btn-outline-light rounded-pill py-2 small fw-semibold">
+                                Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

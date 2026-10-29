@@ -1,0 +1,85 @@
+{% extends 'pokeapp/base.html' %}
+{% load static %}
+
+{% block title %}{{ pokemon.nombre }} - Pokédex{% endblock %}
+
+{% block content %}
+<!-- Enlace al CSS específico de esta vista -->
+<link rel="stylesheet" href="{% static 'pokeapp/style-detalle.css' %}">
+
+<!-- Fondo Dinámico Global -->
+<div class="background-carousel">
+    <div class="bg-image" style="background-image: url('https://i.pinimg.com/1200x/62/8a/23/628a2310c05ed24cedccd15912b42476.jpg');"></div>
+</div>
+<!-- Barra de búsqueda interactiva -->
+<form method="GET" class="d-flex justify-content-center mb-5">
+    <div class="input-group" style="max-width: 500px;">
+        <input class="form-control rounded-start-pill px-4 py-2 text-white bg-dark bg-opacity-50 border-secondary" type="search" name="q" value="{{ query }}" placeholder="Buscar Pokémon por nombre..." aria-label="Buscar">
+        <button class="btn btn-light text-danger rounded-end-pill px-4 fw-bold shadow-sm" type="submit">
+            🔍 Buscar
+        </button>
+    </div>
+</form>
+
+<div class="container py-5 position-relative" style="z-index: 2;">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-lg-5 text-center">
+            
+            <!-- Tarjeta usando la clase independiente -->
+            <div class="card detalle-card p-4 text-white">
+                
+                <!-- Contenedor de la imagen -->
+                <div class="detalle-img-box mb-3">
+                    {% if pokemon.imagen %}
+                        <img src="{{ pokemon.imagen.url }}" class="img-fluid detalle-pokemon-img" alt="{{ pokemon.nombre }}">
+                    {% else %}
+                        <img src="https://via.placeholder.com/240?text=Sin+Imagen" class="img-fluid detalle-pokemon-img opacity-50" alt="Sin imagen">
+                    {% endif %}
+                </div>
+                
+                <!-- Cuerpo de la tarjeta (Ordenado correctamente) -->
+                <div class="card-body px-2 pb-2">
+                    <span class="badge bg-dark bg-opacity-50 rounded-pill px-3 py-1 mb-2 fw-semibold text-uppercase">Ficha de Registro del pokemon</span>
+                    <h1 class="fw-bold text-capitalize text-white mb-2 display-6">{{ pokemon.nombre }}</h1>
+                    
+                    <!-- Datos interactivos -->
+                    <div class="detalle-info-box">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-white-50">Peso del ejemplar:</span>
+                            <strong class="text-white">{{ pokemon.peso }} kg</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-white-50">Estado del Sistema:</span>
+                            <span class="badge bg-success bg-opacity-75 text-white">Activo / Verificado</span>
+                        </div>
+                        <!-- Barra interactiva -->
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between small text-white-50 mb-1">
+                                <span>Índice de Rendimiento</span>
+                                <span>85%</span>
+                            </div>
+                            <div class="progress" style="height: 6px; background: rgba(255,255,255,0.2);">
+                                <div class="progress-bar bg-light" role="progressbar" style="width: 85%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botones de Acción CRUD (Ubicados ordenadamente al final) -->
+                    <div class="d-grid gap-2 mt-3">
+                        <a href="{% url 'editar_pokemon' pokemon.id %}" class="btn btn-warning rounded-pill fw-bold py-2 shadow-sm text-dark">
+                            ✏️ Editar Pokémon
+                        </a>
+                        <a href="{% url 'eliminar_pokemon' pokemon.id %}" class="btn btn-outline-danger rounded-pill fw-bold py-2 shadow-sm">
+                            🗑️ Eliminar Registro
+                        </a>
+                        <a href="{% url 'index' %}" class="btn btn-light text-danger rounded-pill fw-bold py-2 shadow-sm mt-2">
+                            ← Volver al Catálogo
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

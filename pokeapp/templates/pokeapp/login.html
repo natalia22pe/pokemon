@@ -1,0 +1,53 @@
+{% extends 'pokeapp/base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Sesión - Pokédex{% endblock %}
+
+{% block content %}
+<div class="background-carousel">
+    <div class="bg-image" style="background-image: url('https://i.pinimg.com/1200x/62/8a/23/628a2310c05ed24cedccd15912b42476.jpg');"></div>
+</div>
+
+<div class="container py-5 position-relative" style="z-index: 2;">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-lg-5">
+            <div class="card border-0 shadow-lg rounded-4 p-4 text-white" style="background-color: #13033b !important;">
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <span class="badge bg-danger bg-opacity-25 text-white px-3 py-2 rounded-pill fw-semibold mb-2" style="background-color: #b93f23;">Acceso Restringido</span>
+                        <h2 class="fw-bold text-white">Iniciar Sesión</h2>
+                        <p class="text-white-50 small">Ingresa tus credenciales de administrador.</p>
+                    </div>
+
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3 text-start">
+                            <label class="form-label text-white-50 fw-semibold small">Usuario</label>
+                            {{ form.username }}
+                        </div>
+                        
+                        <div class="mb-3 text-start">
+                            <label class="form-label text-white-50 fw-semibold small">Contraseña</label>
+                            {{ form.password }}
+                        </div>
+
+                        {% if form.errors %}
+                            <div class="text-danger small mb-3 text-center">Usuario o contraseña incorrectos.</div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-light text-danger rounded-pill fw-bold py-2 shadow-sm">
+                                Entrar
+                            </button>
+                            <a href="{% url 'index' %}" class="btn btn-outline-light rounded-pill py-2 small fw-semibold">
+                                Volver al Catálogo
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

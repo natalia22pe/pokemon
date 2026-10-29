@@ -1,0 +1,57 @@
+/* =================================================
+   Estilos Interactivos para la Vista de Detalles
+   ================================================= */
+
+/* Tarjeta principal con movimiento de flotación inicial */
+.detalle-card {
+    background-color: #13033b !important;
+    border: none !important;
+    border-radius: 1.25rem !important;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.5) !important;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* Efecto interactivo al pasar el mouse sobre la tarjeta */
+.detalle-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 1.5rem 3.5rem rgba(185, 63, 35, 0.3) !important;
+}
+
+/* Contenedor interno de la imagen */
+.detalle-img-box {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Imagen del Pokémon con animación de zoom suave al hacer hover */
+.detalle-pokemon-img {
+    height: 240px;
+    object-fit: contain;
+    mix-blend-mode: normal !important;
+    filter: drop-shadow(0 12px 20px rgba(0, 0, 0, 0.5));
+    display: block;
+    margin: 0 auto;
+    transition: transform 0.5s ease;
+}
+
+.detalle-card:hover .detalle-pokemon-img {
+    transform: scale(1.08) rotate(2deg);
+}
+
+/* Caja de datos interactiva */
+.detalle-info-box {
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 0.75rem;
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+    text-align: left;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Animación sutil para la barra de rendimiento */
+.progress-bar {
+    transition: width 1.2s ease-in-out;
+}

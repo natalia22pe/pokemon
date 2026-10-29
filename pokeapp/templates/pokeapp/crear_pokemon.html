@@ -1,0 +1,57 @@
+{% extends 'pokeapp/base.html' %}
+{% load static %}
+
+{% block title %}Registrar Pokémon - Pokédex{% endblock %}
+
+{% block content %}
+<!-- Fondo Dinámico Global -->
+<div class="background-carousel">
+    <div class="bg-image"></div>
+</div>
+
+<div class="container py-5 position-relative" style="z-index: 2;">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-6 col-lg-5">
+            
+            <!-- Tarjeta del Formulario con el estilo de la aplicación -->
+            <div class="card border-0 shadow-lg rounded-4 p-4 text-white" style="background-color: #13033b !important;">
+                <div class="card-body">
+                    
+                    <div class="text-center mb-4">
+                        <span class="badge bg-danger bg-opacity-25 text-white px-3 py-2 rounded-pill fw-semibold mb-2" style="background-color: #b93f23;">Nuevo Registro</span>
+                        <h2 class="fw-bold text-white">Registrar Pokémon</h2>
+                        <p class="text-white-50 small">Ingresa los datos del ejemplar para agregarlo al sistema.</p>
+                    </div>
+
+                    <!-- ATENCIÓN: enctype="multipart/form-data" es obligatorio para que se puedan subir imágenes -->
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Recorremos los campos del formulario para darles estilo adaptado -->
+                        {% for field in form %}
+                            <div class="mb-3 text-start">
+                                <label class="form-label text-white-50 fw-semibold small">{{ field.label }}</label>
+                                {{ field }}
+                                {% if field.errors %}
+                                    <div class="text-danger small mt-1">{{ field.errors }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-light text-danger rounded-pill fw-bold py-2 shadow-sm">
+                                Guardar Pokémon
+                            </button>
+                            <a href="{% url 'index' %}" class="btn btn-outline-light rounded-pill py-2 small fw-semibold">
+                                Cancelar / Volver
+                            </a>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
