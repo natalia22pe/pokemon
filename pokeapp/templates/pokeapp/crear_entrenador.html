@@ -1,0 +1,38 @@
+{% extends 'pokeapp/base.html' %}
+{% load static %}
+
+{% block title %}Registrar Entrenador – Pokedex SENA CIDE{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card card-gimnasios shadow-lg rounded-4 p-4 bg-dark text-white border-secondary">
+                
+                <h2 class="fw-bold mb-4 text-center">➕ Registrar Nuevo Entrenador</h2>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <!-- Ajusta los campos según los atributos reales de tu modelo Entrenador -->
+                    <div class="mb-3">
+                        <label for="nombre" class="form-label">Nombre del Entrenador</label>
+                        <input type="text" class="form-control bg-secondary text-white border-0" id="nombre" name="nombre" required placeholder="Ej. Ash Ketchum">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edad" class="form-label">Edad / Nivel</label>
+                        <input type="text" class="form-control bg-secondary text-white border-0" id="edad" name="edad" placeholder="Edad o nivel del entrenador">
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'entrenadores' %}" class="btn btn-outline-light rounded-pill px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-danger fw-bold rounded-pill px-4 shadow-sm" style="background-color: #b93f23; border: none;">Guardar Entrenador</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

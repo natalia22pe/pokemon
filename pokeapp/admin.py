@@ -1,21 +1,17 @@
-
-
-
 from django.contrib import admin
 from .models import Entrenadores, Gimnasio, Pokemon
 
 @admin.register(Entrenadores)
 class EntrenadoresAdmin(admin.ModelAdmin):
-    list_display = ('id_documento', 'nombre', 'apellido', 'pokemones', 'medallas')
+    list_display = ('id_documento', 'nombre', 'apellido', 'medallas')
     search_fields = ('nombre', 'apellido', 'id_documento')
 
 @admin.register(Gimnasio)
 class GimnasioAdmin(admin.ModelAdmin):
-    list_display = ('lider_del_GYM', 'Naturaleza_de_GYM', 'Medallas')
-    search_fields = ('lider_del_GYM', 'Naturaleza_de_GYM')
+    list_display = ('id', 'lider', 'naturaleza_gym', 'medallas_gym')
+    search_fields = ('naturaleza_gym',)
 
 @admin.register(Pokemon)
 class PokemonAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'peso', 'naturaleza', 'habilidades', 'entrenador')
-    search_fields = ('nombre', 'naturaleza', 'habilidades')
-    list_filter = ('naturaleza', 'habilidades')
+    list_display = ('id', 'nombre', 'nivel', 'peso', 'naturaleza')
+    search_fields = ('nombre', 'naturaleza')

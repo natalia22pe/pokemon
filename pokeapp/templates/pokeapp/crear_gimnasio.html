@@ -1,0 +1,42 @@
+{% extends 'pokeapp/base.html' %}
+{% load static %}
+
+{% block title %}Registrar Gimnasio – Pokedex SENA CIDE{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card card-gimnasios shadow-lg rounded-4 p-4 bg-dark text-white border-secondary">
+                
+                <h2 class="fw-bold mb-4 text-center">➕ Registrar Nuevo Gimnasio</h2>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="lider" class="form-label">Líder del GYM</label>
+                        <input type="text" class="form-control bg-secondary text-white border-0" id="lider" name="lider" required placeholder="Nombre del líder">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="naturaleza_gym" class="form-label">Naturaleza / Tipo</label>
+                        <input type="text" class="form-control bg-secondary text-white border-0" id="naturaleza_gym" name="naturaleza_gym" required placeholder="Ej. Fuego, Agua, Normal...">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="medallas_gym" class="form-label">Medalla Otorgada</label>
+                        <input type="text" class="form-control bg-secondary text-white border-0" id="medallas_gym" name="medallas_gym" required placeholder="Nombre de la medalla">
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'gimnasios' %}" class="btn btn-outline-light rounded-pill px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-danger fw-bold rounded-pill px-4 shadow-sm" style="background-color: #b93f23; border: none;">Guardar Gimnasio</button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

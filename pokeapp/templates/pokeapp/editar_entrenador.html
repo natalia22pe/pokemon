@@ -1,0 +1,26 @@
+{% extends 'pokeapp/base.html' %}
+{% load static %}
+
+{% block title %}Editar Entrenador — Pokédex SENA CIDE{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card card-entrenadores shadow-lg rounded-4 p-4 text-white" style="background-color: rgba(25, 20, 45, 0.9);">
+                <h2 class="fw-bold mb-4 text-center">✏️ Editar Entrenador</h2>
+                
+                <form method="POST">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'entrenadores' %}" class="btn btn-outline-light rounded-pill px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-warning fw-bold rounded-pill px-4 text-dark">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

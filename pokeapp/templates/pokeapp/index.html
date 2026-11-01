@@ -14,38 +14,37 @@
 
 <div class="container py-5 position-relative" style="z-index: 2;">
     
-    <!-- Encabezado y Controles de Administración Superiores -->
-    <div class="row align-items-center mb-5">
-        <div class="col text-center">
-            <span class="badge bg-danger bg-opacity-25 text-white px-3 py-2 rounded-pill fw-semibold mb-2" style="background-color: #b93f23;">Pokémon</span>
-            <h1 class="fw-bold text-white display-5">Catálogo de Pokémon</h1>
-            <p class="text-white-50">¿Cuál es tu favorito?</p>
-        </div>
-        
-        <!-- Botones de Admin / Autenticación en la esquina superior -->
-        <div class="col-12 text-center mt-3">
-            {% if user.is_authenticated %}
-                <div class="d-inline-flex gap-2">
-                    <a href="{% url 'agregar_pokemon' %}" class="btn btn-danger btn-sm rounded-pill fw-bold px-4 shadow-sm" style="background-color: #b93f23;">
-                        ➕ Registrar Pokémon
-                    </a>
-                    <form action="{% url 'logout' %}" method="POST" class="d-inline m-0">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-outline-light btn-sm rounded-pill px-4 fw-semibold">
-                            Cerrar Sesión
-                        </button>
-                    </form>
-                </div>
-            {% else %}
-            {% endif %}
-        </div>
+    <!-- Encabezado -->
+    <div class="text-center mb-4">
+        <span class="badge bg-danger bg-opacity-25 text-white px-3 py-2 rounded-pill fw-semibold mb-2" style="background-color: #b93f23;">Pokémon</span>
+        <h1 class="fw-bold text-white display-5">Catálogo de Pokémon</h1>
+        <p class="text-white-50">¿Cuál es tu favorito?</p>
+    </div>
+
+    <!-- Controles de Autenticación y Admin (Movidos arriba para mejor orden visual y UX) -->
+    <div class="d-flex justify-content-center align-items-center gap-3 mb-5">
+        {% if user.is_authenticated %}
+            <a href="{% url 'crear_pokemon' %}" class="btn btn-danger rounded-pill fw-bold px-4 shadow-sm" style="background-color: #b93f23;">
+                ➕ Registrar Pokémon
+            </a>
+            <form action="{% url 'logout' %}" method="POST" class="d-inline m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-light rounded-pill px-4 fw-semibold">
+                    Cerrar Sesión
+                </button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn btn-outline-light rounded-pill px-4 fw-semibold">
+                🔑 Admin Login
+            </a>
+        {% endif %}
     </div>
 
     <!-- Barra de búsqueda interactiva -->
     <form method="GET" class="d-flex justify-content-center mb-5">
-        <div class="input-group" style="max-width: 500px;">
-            <input class="form-control rounded-start-pill px-4 py-2 text-white bg-dark bg-opacity-50 border-secondary" type="search" name="q" value="{{ query }}" placeholder="Buscar Pokémon por nombre..." aria-label="Buscar">
-            <button class="btn btn-light text-danger rounded-end-pill px-4 fw-bold shadow-sm" type="submit">
+        <div class="input-group shadow-lg rounded-pill overflow-hidden" style="max-width: 500px;">
+            <input class="form-control border-0 px-4 py-2 text-white bg-dark bg-opacity-50" type="search" name="q" value="{{ query }}" placeholder="Buscar Pokémon por nombre..." aria-label="Buscar">
+            <button class="btn btn-light text-danger px-4 fw-bold shadow-sm" type="submit">
                 🔍 Buscar
             </button>
         </div>
@@ -58,7 +57,7 @@
                 <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                     <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden position-relative transition-card" style="background-color: #13033b !important;">
                         
-                        <div class="position-absolute top-0 start-0 m-3 badge bg-dark bg-opacity-50 rounded-pill px-2 py-1 text-white-50 small">
+                        <div class="position-absolute top-0 start-0 m-3 badge bg-dark bg-opacity-50 rounded-pill px-2 py-1 text-white-50 small" style="z-index: 3;">
                             #{{ pokemon.id }}
                         </div>
 
@@ -75,6 +74,7 @@
                         <div class="card-body text-center d-flex flex-column justify-content-between">
                             <div>
                                 <h3 class="card-title fw-bold text-capitalize text-white fs-4 mb-1">{{ pokemon.nombre }}</h3>
+                                <p class="text-info small mb-1">Tipo: {{ pokemon.naturaleza }} | Nivel: {{ pokemon.nivel }}</p>
                                 <p class="text-white-50 small mb-3">Peso: <strong>{{ pokemon.peso }} kg</strong></p>
                             </div>
                             <a href="{% url 'detalle_pokemon' pokemon.id %}" class="btn btn-light text-danger rounded-pill fw-bold py-2 shadow-sm mt-2">
@@ -87,7 +87,7 @@
             {% endfor %}
         </div>
     {% else %}
-        <!-- Tarjeta de Sin Registros (Diseño Oscuro Coherente) -->
+        <!-- Tarjeta de Sin Registros -->
         <div class="row justify-content-center">
             <div class="col-12 col-md-6 col-lg-5 text-center">
                 <div class="card border-0 shadow-lg rounded-4 p-5 text-white" style="background-color: #13033b !important;">
@@ -101,7 +101,7 @@
                         {% endif %}
                     </p>
                     {% if user.is_authenticated %}
-                        <a href="{% url 'agregar_pokemon' %}" class="btn btn-light text-danger rounded-pill fw-bold py-2 shadow-sm">
+                        <a href="{% url 'crear_pokemon' %}" class="btn btn-light text-danger rounded-pill fw-bold py-2 shadow-sm">
                             Registrar Nuevo Pokémon
                         </a>
                     {% endif %}
