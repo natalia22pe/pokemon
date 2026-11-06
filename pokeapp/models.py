@@ -9,6 +9,7 @@ class Entrenadores(models.Model):
     
     # Relación Muchos a Muchos (N:M) con Pokemon
     pokemones = models.ManyToManyField('Pokemon', related_name='entrenadores', blank=True)
+    
 
     def __str__(self):
         return f'{self.nombre} {self.apellido} (Doc: {self.id_documento})'

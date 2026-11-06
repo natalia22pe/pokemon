@@ -13,6 +13,8 @@ urlpatterns = [
     path('agregar/', views.crear_pokemon, name='crear_pokemon'),
     path('editar/<int:pk>/', views.editar_pokemon, name='editar_pokemon'),
     path('eliminar/<int:pk>/', views.eliminar_pokemon, name='eliminar_pokemon'),
+    path('buscar-pokemon/', views.buscar_pokemon, name='buscar_pokemon'),
+    path('adivina-pokemon/', views.adivina_pokemon, name='adivina_pokemon'),
     
     # Rutas para Entrenadores
     path('entrenadores/', views.lista_entrenadores, name='entrenadores'),

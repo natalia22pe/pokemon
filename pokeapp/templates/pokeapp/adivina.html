@@ -1,0 +1,47 @@
+{% extends 'pokeapp/base.html' %}
+{% load static %}
+
+{% block title %}Adivina el Pokémon{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center text-white" style="max-width: 600px;">
+    
+    <h1 class="fw-bold mb-3">❓ ¿Quién es este Pokémon?</h1>
+    <p class="text-white-50 mb-4">Adivina el nombre oculto detrás de la silueta.</p>
+
+    {% if resultado %}
+        <div class="alert {% if 'Correcto' in resultado %}alert-success{% else %}alert-danger{% endif %} rounded-pill fw-bold py-3 mb-4">
+            {{ resultado }}
+        </div>
+        <a href="{% url 'adivina_pokemon' %}" class="btn btn-warning rounded-pill fw-bold px-4 mb-4">Jugar otra vez 🔄</a>
+    {% endif %}
+
+    {% if pokemon %}
+        <div class="card border-0 shadow-lg p-4 rounded-4" style="background-color: #13033b !important;">
+            <div class="py-4">
+                <!-- Si ya adivinó se muestra normal, si no, se muestra en negro (silueta) -->
+                <img src="{{ pokemon.sprites.front_default }}" 
+                     class="img-fluid" 
+                     alt="Pokémon Misterioso" 
+                     style="height: 200px; object-fit: contain; {% if not resultado %}filter: brightness(0);{% endif %}">
+            </div>
+
+            {% if not resultado %}
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="nombre_real" value="{{ pokemon.name }}">
+                    <div class="input-group shadow-lg rounded-pill overflow-hidden mb-3">
+                        <input type="text" name="intento" class="form-control border-0 px-4 py-2 text-center text-white bg-dark bg-opacity-50" placeholder="¿Qué Pokémon es?" autocomplete="off" required>
+                        <button class="btn btn-danger px-4 fw-bold" type="submit">¡Adivinar!</button>
+                    </div>
+                </form>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <div class="mt-4">
+        <a href="{% url 'index' %}" class="text-white text-decoration-none">← Volver al Catálogo</a>
+    </div>
+
+</div>
+{% endblock %}

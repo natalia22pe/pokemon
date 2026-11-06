@@ -19,14 +19,18 @@
         <span class="badge bg-danger bg-opacity-25 text-white px-3 py-2 rounded-pill fw-semibold mb-2" style="background-color: #b93f23;">Pokémon</span>
         <h1 class="fw-bold text-white display-5">Catálogo de Pokémon</h1>
         <p class="text-white-50">¿Cuál es tu favorito?</p>
+        <a href="{% url 'adivina_pokemon' %}" class="btn btn-warning rounded-pill fw-bold px-4 shadow-sm">
+            🎮 Adivina el Pokémon
+        </a>
     </div>
 
-    <!-- Controles de Autenticación y Admin (Movidos arriba para mejor orden visual y UX) -->
+    <!-- Controles de Autenticación y Admin -->
     <div class="d-flex justify-content-center align-items-center gap-3 mb-5">
         {% if user.is_authenticated %}
             <a href="{% url 'crear_pokemon' %}" class="btn btn-danger rounded-pill fw-bold px-4 shadow-sm" style="background-color: #b93f23;">
                 ➕ Registrar Pokémon
             </a>
+               
             <form action="{% url 'logout' %}" method="POST" class="d-inline m-0">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-outline-light rounded-pill px-4 fw-semibold">
@@ -40,17 +44,60 @@
         {% endif %}
     </div>
 
-    <!-- Barra de búsqueda interactiva -->
-    <form method="GET" class="d-flex justify-content-center mb-5">
+    <!-- Barra de búsqueda interactiva (Base de datos local) -->
+    <form method="GET" class="d-flex justify-content-center mb-4">
         <div class="input-group shadow-lg rounded-pill overflow-hidden" style="max-width: 500px;">
-            <input class="form-control border-0 px-4 py-2 text-white bg-dark bg-opacity-50" type="search" name="q" value="{{ query }}" placeholder="Buscar Pokémon por nombre..." aria-label="Buscar">
+            <input class="form-control border-0 px-4 py-2 text-white bg-dark bg-opacity-50" type="search" name="q" value="{{ query }}" placeholder="Buscar en tus registros locales..." aria-label="Buscar">
             <button class="btn btn-light text-danger px-4 fw-bold shadow-sm" type="submit">
-                🔍 Buscar
+                🔍 Buscar Local
             </button>
         </div>
     </form>
 
-    <!-- Listado de Pokémon o Mensaje de Vacío -->
+    <!-- Barra de búsqueda interactiva (PokéAPI Externa) - Corregido sin action externo -->
+    <form method="GET" class="d-flex justify-content-center mb-5">
+        <div class="input-group shadow-lg rounded-pill overflow-hidden" style="max-width: 500px;">
+            <input class="form-control border-0 px-4 py-2 text-white bg-dark bg-opacity-50" type="text" name="nombre" value="{{ nombre_api }}" placeholder="Busca cualquier Pokémon en la PokéAPI..." required>
+            <button class="btn btn-warning text-dark px-4 fw-bold shadow-sm" type="submit">
+                🌐 Buscar en API
+            </button>
+        </div>
+    </form>
+
+    <!-- Mensaje de error de la PokéAPI -->
+    {% if error %}
+        <div class="row justify-content-center mb-4">
+            <div class="col-12 col-md-6 text-center">
+                <div class="alert alert-danger rounded-pill py-2 shadow-sm" role="alert">
+                    {{ error }}
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Resultado obtenido de la PokéAPI -->
+    {% if pokemon %}
+        <div class="row justify-content-center mb-5">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                <div class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden position-relative" style="background-color: #1b074a !important;">
+                    <div class="position-absolute top-0 start-0 m-3 badge bg-warning text-dark rounded-pill px-2 py-1 fw-bold" style="z-index: 3;">
+                        API Externa
+                    </div>
+                    <div class="p-4 text-center">
+                        <img src="{{ pokemon.sprites.front_default }}" class="img-fluid" alt="{{ pokemon.name }}" style="height: 180px; object-fit: contain;">
+                    </div>
+                    <div class="card-body text-center d-flex flex-column justify-content-between text-white">
+                        <div>
+                            <h3 class="card-title fw-bold text-capitalize fs-4 mb-1">{{ pokemon.name|capfirst }}</h3>
+                            <p class="text-info small mb-1">Altura: {{ pokemon.height }} | Peso: {{ pokemon.weight }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Listado de Pokémon Locales o Mensaje de Vacío -->
     {% if pokemons %}
         <div class="row g-4">
             {% for pokemon in pokemons %}
@@ -87,7 +134,7 @@
             {% endfor %}
         </div>
     {% else %}
-        <!-- Tarjeta de Sin Registros -->
+        <!-- Tarjeta de Sin Registros Locales -->
         <div class="row justify-content-center">
             <div class="col-12 col-md-6 col-lg-5 text-center">
                 <div class="card border-0 shadow-lg rounded-4 p-5 text-white" style="background-color: #13033b !important;">
@@ -95,9 +142,9 @@
                     <h3 class="fw-bold text-white mb-2">Sin registros activos</h3>
                     <p class="text-white-50 mb-4 small">
                         {% if query %}
-                            No se encontraron Pokémon que coincidan con "{{ query }}".
+                            No se encontraron Pokémon locales que coincidan con "{{ query }}".
                         {% else %}
-                            Aún no hay Pokémon guardados o la consulta no los está devolviendo.
+                            Aún no hay Pokémon guardados en tu base de datos local.
                         {% endif %}
                     </p>
                     {% if user.is_authenticated %}

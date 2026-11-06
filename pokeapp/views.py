@@ -1,26 +1,104 @@
+import requests
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
+
 from .models import Pokemon, Entrenadores, Gimnasio
 from .forms import PokemonForm, EntrenadorForm, GimnasioForm
 
+
 # ==========================================
-# VISTAS DE POKÉMON
+# VISTAS PRINCIPALES Y APIS EXTERNAS
 # ==========================================
 
 def index(request):
+    # 1. Búsqueda en la Base de Datos Local
     query = request.GET.get('q', '')
     if query:
         pokemons = Pokemon.objects.filter(nombre__icontains=query)
     else:
         pokemons = Pokemon.objects.all()
-        
-    return render(request, 'pokeapp/index.html', {'pokemons': pokemons, 'query': query})
 
-def detalle_pokemon(request, pokemon_id):
-    pokemon = get_object_or_404(Pokemon, id=pokemon_id)
-    return render(request, 'pokeapp/detalle.html', {'pokemon': pokemon})
+    # 2. Búsqueda en la PokéAPI (Datos de Pokémon)
+    pokemon_api = None
+    error_api = None
+    nombre_api = request.GET.get('nombre', '').strip().lower()
+
+    if nombre_api:
+        try:
+            url_pokeapi = f"https://pokeapi.co/api/v2/pokemon/{nombre_api}"
+            res_poke = requests.get(url_pokeapi, timeout=5)
+            if res_poke.status_code == 200:
+                pokemon_api = res_poke.json()
+            else:
+                error_api = f"No se encontró el Pokémon '{nombre_api}' en la PokéAPI."
+        except Exception:
+            error_api = "Error al conectar con la PokéAPI."
+
+    # 3. Búsqueda en Pokémon TCG API (Cartas Coleccionables)
+    carta_tcg = None
+    error_tcg = None
+    nombre_carta = request.GET.get('carta', '').strip()
+
+    if nombre_carta:
+        try:
+            url_tcg = f"https://api.pokemontcg.io/v2/cards?q=name:{nombre_carta}"
+            res_tcg = requests.get(url_tcg, timeout=5)
+            if res_tcg.status_code == 200:
+                datos_tcg = res_tcg.json()
+                if datos_tcg.get('data'):
+                    # Retorna los datos de la primera carta encontrada
+                    carta_tcg = datos_tcg['data'][0]
+                else:
+                    error_tcg = f"No se encontraron cartas para '{nombre_carta}'."
+            else:
+                error_tcg = "No se pudo consultar la API de Cartas TCG."
+        except Exception:
+            error_tcg = "Error de conexión con Pokémon TCG API."
+
+    # Renderizamos la plantilla index.html con todos los contextos unidos
+    return render(request, 'pokeapp/index.html', {
+        'pokemons': pokemons,
+        'query': query,
+        'pokemon': pokemon_api,
+        'error': error_api,
+        'nombre_api': nombre_api,
+        'carta_tcg': carta_tcg,
+        'error_tcg': error_tcg,
+        'nombre_carta': nombre_carta,
+    })
+
+
+def buscar_pokemon(request):
+    """
+    Vista individual opcional para buscar en la PokéAPI si tienes una ruta separada.
+    """
+    pokemon_data = None
+    error = None
+
+    if 'nombre' in request.GET:
+        nombre = request.GET.get('nombre').strip().lower()
+        if nombre:
+            try:
+                url = f"https://pokeapi.co/api/v2/pokemon/{nombre}"
+                respuesta = requests.get(url, timeout=5)
+                if respuesta.status_code == 200:
+                    pokemon_data = respuesta.json()
+                else:
+                    error = "No se encontró ningún Pokémon con ese nombre."
+            except Exception:
+                error = "Error al conectar con el servidor de la API."
+
+    return render(request, 'pokeapp/index.html', {
+        'pokemon': pokemon_data,
+        'error': error
+    })
+
+
+# ==========================================
+# AUTENTICACIÓN
+# ==========================================
 
 def login_view(request):
     if request.method == 'POST':
@@ -33,6 +111,16 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, 'pokeapp/login.html', {'form': form})
 
+
+# ==========================================
+# VISTAS DE POKÉMON (CRUD LOCAL)
+# ==========================================
+
+def detalle_pokemon(request, pokemon_id):
+    pokemon = get_object_or_404(Pokemon, id=pokemon_id)
+    return render(request, 'pokeapp/detalle.html', {'pokemon': pokemon})
+
+
 @login_required(login_url='/accounts/login/')
 def crear_pokemon(request):
     if request.method == 'POST':
@@ -42,8 +130,8 @@ def crear_pokemon(request):
             return redirect('index')
     else:
         form = PokemonForm()
-    
     return render(request, 'pokeapp/crear_pokemon.html', {'form': form})
+
 
 @login_required(login_url='/accounts/login/')
 def editar_pokemon(request, pk):
@@ -55,8 +143,8 @@ def editar_pokemon(request, pk):
             return redirect('detalle_pokemon', pokemon_id=pokemon.id)
     else:
         form = PokemonForm(instance=pokemon)
-    
     return render(request, 'pokeapp/editar_pokemon.html', {'form': form, 'pokemon': pokemon})
+
 
 @login_required(login_url='/accounts/login/')
 def eliminar_pokemon(request, pk):
@@ -68,12 +156,25 @@ def eliminar_pokemon(request, pk):
 
 
 # ==========================================
-# VISTAS DE ENTRENADORES
+# VISTAS DE ENTRENADORES (CRUD LOCAL)
 # ==========================================
 
 def lista_entrenadores(request):
     entrenadores = Entrenadores.objects.all()
     return render(request, 'pokeapp/entrenadores.html', {'entrenadores': entrenadores})
+
+
+@login_required(login_url='/accounts/login/')
+def crear_entrenador(request):
+    if request.method == 'POST':
+        form = EntrenadorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('entrenadores')
+    else:
+        form = EntrenadorForm()
+    return render(request, 'pokeapp/crear_entrenador.html', {'form': form})
+
 
 @login_required(login_url='/accounts/login/')
 def editar_entrenador(request, pk):
@@ -87,6 +188,7 @@ def editar_entrenador(request, pk):
         form = EntrenadorForm(instance=entrenador)
     return render(request, 'pokeapp/editar_entrenador.html', {'form': form, 'entrenador': entrenador})
 
+
 @login_required(login_url='/accounts/login/')
 def eliminar_entrenador(request, pk):
     entrenador = get_object_or_404(Entrenadores, pk=pk)
@@ -97,12 +199,25 @@ def eliminar_entrenador(request, pk):
 
 
 # ==========================================
-# VISTAS DE GIMNASIOS
+# VISTAS DE GIMNASIOS (CRUD LOCAL)
 # ==========================================
 
 def lista_gimnasios(request):
     gimnasios = Gimnasio.objects.all()
     return render(request, 'pokeapp/Gimnasio.html', {'gimnasios': gimnasios})
+
+
+@login_required(login_url='/accounts/login/')
+def crear_gimnasio(request):
+    if request.method == 'POST':
+        form = GimnasioForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('gimnasios')
+    else:
+        form = GimnasioForm()
+    return render(request, 'pokeapp/crear_gimnasio.html', {'form': form})
+
 
 @login_required(login_url='/accounts/login/')
 def editar_gimnasio(request, pk):
@@ -116,6 +231,7 @@ def editar_gimnasio(request, pk):
         form = GimnasioForm(instance=gimnasio)
     return render(request, 'pokeapp/editar_gimnasio.html', {'form': form, 'gimnasio': gimnasio})
 
+
 @login_required(login_url='/accounts/login/')
 def eliminar_gimnasio(request, pk):
     gimnasio = get_object_or_404(Gimnasio, pk=pk)
@@ -123,35 +239,38 @@ def eliminar_gimnasio(request, pk):
         gimnasio.delete()
         return redirect('gimnasios')
     return render(request, 'pokeapp/eliminar_gimnasio.html', {'gimnasio': gimnasio})
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Gimnasio
-# Asegúrate de tener importado tu formulario de gimnasio (o créalo si falta)
 
-def crear_gimnasio(request):
-    if request.method == 'POST':
-        # Aquí procesas los datos del formulario para guardarlos
-        lider = request.POST.get('lider')
-        naturaleza_gym = request.POST.get('naturaleza_gym')
-        medallas_gym = request.POST.get('medallas_gym')
-        
-        Gimnasio.objects.create(
-            lider_id=lider, 
-            naturaleza_gym=naturaleza_gym, 
-            medallas_gym=medallas_gym
-        )
-        return redirect('gimnasios')
-        
-    return render(request, 'pokeapp/crear_gimnasio.html') 
+import random
 
-def crear_entrenador(request):
+def adivina_pokemon(request):
+    pokemon_misterioso = None
+    resultado = None
+    
+    # Si el usuario envió su intento por el formulario
     if request.method == 'POST':
-        # Recoge los datos enviados por el formulario (ajusta los nombres según tus campos del modelo)
-        nombre = request.POST.get('nombre')
-        edad = request.POST.get('edad')
+        intentos = request.POST.get('intento', '').strip().lower()
+        nombre_real = request.POST.get('nombre_real', '').lower()
         
-        # Aquí guardas el objeto en la base de datos (importa tu modelo Entrenador si es necesario)
-        # Entrenador.objects.create(nombre=nombre, edad=edad)
-        
-        return redirect('entrenadores')
-        
-    return render(request, 'pokeapp/crear_entrenador.html')
+        if intentos == nombre_real:
+            resultado = f" ¡Correcto! Era {nombre_real.capitalize()}."
+        else:
+            resultado = f" Incorrecto. Era {nombre_real.capitalize()}."
+            
+        # Generamos uno nuevo para seguir jugando
+        id_aleatorio = random.randint(1, 151)
+    else:
+        # Primer cargue del juego: ID aleatorio
+        id_aleatorio = random.randint(1, 151)
+
+    try:
+        url = f"https://pokeapi.co/api/v2/pokemon/{id_aleatorio}"
+        respuesta = requests.get(url, timeout=5)
+        if respuesta.status_code == 200:
+            pokemon_misterioso = respuesta.json()
+    except Exception:
+        pass
+
+    return render(request, 'pokeapp/adivina.html', {
+        'pokemon': pokemon_misterioso,
+        'resultado': resultado
+    })
