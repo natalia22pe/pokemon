@@ -1,4 +1,6 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 from .models import Pokemon, Entrenadores, Gimnasio
 
 class PokemonForm(forms.ModelForm):
@@ -35,4 +37,26 @@ class GimnasioForm(forms.ModelForm):
             'lider': forms.Select(attrs={'class': 'form-control'}),
             'naturaleza_gym': forms.TextInput(attrs={'class': 'form-control'}),
             'medallas_gym': forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+# --- NUEVO FORMULARIO DE REGISTRO CON ROLES ---
+class RegistroForm(UserCreationForm):
+    ROLES_CHOICES = [
+        ('Entrenadores', 'Entrenador'),
+        ('Lideres', 'Líder de Gimnasio'),
+        ('Directivos', 'Directivo / Administrador'),
+    ]
+    
+    rol = forms.ChoiceField(
+        choices=ROLES_CHOICES, 
+        label="Selecciona tu Rol", 
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = UserCreationForm.Meta.fields + ('email',)
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }

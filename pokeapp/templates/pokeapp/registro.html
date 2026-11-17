@@ -1,0 +1,73 @@
+{% extends 'pokeapp/base.html' %}
+{% load static %}
+
+{% block title %}Registro de Usuario — PokeApp SENA CIDE{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow bg-dark text-white border-secondary">
+            <div class="card-header bg-danger text-center">
+                <h3>⚡ Crear Cuenta en PokeApp ⚡</h3>
+            </div>
+            <div class="card-body">
+                
+                <!-- Mensajes de éxito o alerta de Django -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Formulario de Registro -->
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    {{ form.as_p }}
+
+                    <button type="submit" class="btn btn-danger w-100 mt-3">Registrarse</button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <p class="text-white-50">¿Ya tienes una cuenta? <a href="{% url 'login' %}" class="text-danger fw-bold">Inicia sesión aquí</a></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script para mostrar/ocultar contraseña en los campos de password -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const passwordInputs = document.querySelectorAll('input[type="password"]');
+        
+        passwordInputs.forEach(function(passwordInput) {
+            const parent = passwordInput.parentNode;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-group';
+            parent.replaceChild(wrapper, passwordInput);
+            wrapper.appendChild(passwordInput);
+
+            const button = document.createElement('button');
+            button.className = 'btn btn-outline-secondary text-white';
+            button.type = 'button';
+            button.innerHTML = '👁️';
+            wrapper.appendChild(button);
+
+            button.addEventListener('click', function() {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    button.innerHTML = '👁️‍🗨️';
+                } else {
+                    passwordInput.type = 'password';
+                    button.innerHTML = '👁️';
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

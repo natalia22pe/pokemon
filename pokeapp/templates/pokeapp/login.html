@@ -29,7 +29,10 @@
                         
                         <div class="mb-3 text-start">
                             <label class="form-label text-white-50 fw-semibold small">Contraseña</label>
-                            {{ form.password }}
+                            <div class="input-group" id="show_hide_password">
+                                {{ form.password }}
+                                <button class="btn btn-outline-secondary text-white" type="button" id="togglePassword">👁️</button>
+                            </div>
                         </div>
 
                         {% if form.errors %}
@@ -50,4 +53,24 @@
         </div>
     </div>
 </div>
+
+<!-- Script para mostrar/ocultar contraseña -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const passwordInput = document.querySelector('input[name="password"]');
+        const toggleButton = document.getElementById('togglePassword');
+
+        if (passwordInput && toggleButton) {
+            toggleButton.addEventListener('click', function() {
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    toggleButton.innerHTML = '👁️‍🗨️';
+                } else {
+                    passwordInput.type = 'password';
+                    toggleButton.innerHTML = '👁️';
+                }
+            });
+        }
+    });
+</script>
 {% endblock %}

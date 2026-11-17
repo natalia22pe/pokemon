@@ -1,11 +1,15 @@
 import requests
+import random
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
+from django.utils.http import url_has_allowed_host_and_scheme
 
 from .models import Pokemon, Entrenadores, Gimnasio
-from .forms import PokemonForm, EntrenadorForm, GimnasioForm
+from .forms import PokemonForm, EntrenadorForm, GimnasioForm, RegistroForm
 
 
 # ==========================================
@@ -48,7 +52,6 @@ def index(request):
             if res_tcg.status_code == 200:
                 datos_tcg = res_tcg.json()
                 if datos_tcg.get('data'):
-                    # Retorna los datos de la primera carta encontrada
                     carta_tcg = datos_tcg['data'][0]
                 else:
                     error_tcg = f"No se encontraron cartas para '{nombre_carta}'."
@@ -57,7 +60,6 @@ def index(request):
         except Exception:
             error_tcg = "Error de conexión con Pokémon TCG API."
 
-    # Renderizamos la plantilla index.html con todos los contextos unidos
     return render(request, 'pokeapp/index.html', {
         'pokemons': pokemons,
         'query': query,
@@ -71,9 +73,6 @@ def index(request):
 
 
 def buscar_pokemon(request):
-    """
-    Vista individual opcional para buscar en la PokéAPI si tienes una ruta separada.
-    """
     pokemon_data = None
     error = None
 
@@ -97,19 +96,103 @@ def buscar_pokemon(request):
 
 
 # ==========================================
-# AUTENTICACIÓN
+# AUTENTICACIÓN INTENTOS 3
 # ==========================================
 
 def login_view(request):
-    if request.method == 'POST':
+    if request.user.is_authenticated:
+        return redirect("index")
+
+    if "intentos_login" not in request.session:
+        request.session["intentos_login"] = 0
+
+    if request.session["intentos_login"] >= 3:
+        return render(
+            request, "pokeapp/login.html", {"form": AuthenticationForm(), "bloqueado": True}
+        )
+
+    if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
+            request.session["intentos_login"] = 0
             user = form.get_user()
             login(request, user)
-            return redirect('index')
+
+            siguiente = request.GET.get("next")
+            if siguiente and url_has_allowed_host_and_scheme(
+                siguiente, allowed_hosts={request.get_host()}
+            ):
+                return redirect(siguiente)
+            return redirect("index")
+        else:
+            request.session["intentos_login"] += 1
+            intentos_restantes = 3 - request.session["intentos_login"]
+            if intentos_restantes > 0:
+                messages.error(
+                    request,
+                    f"Credenciales incorrectas. Te quedan {intentos_restantes} intentos.",
+                )
+            else:
+                messages.error(
+                    request,
+                    "Has superado los 3 intentos permitidos. Acceso bloqueado.",
+                )
     else:
         form = AuthenticationForm()
-    return render(request, 'pokeapp/login.html', {'form': form})
+
+    return render(request, "pokeapp/login.html", {"form": form})
+
+# ==========================================
+#  REGISTRO
+# ==========================================
+
+
+def registro_view(request):
+    if request.user.is_authenticated:
+        return redirect('index')
+
+    if request.method == 'POST':
+        form = RegistroForm(request.POST)
+        if form.is_valid():
+            user = form.save()  # Guarda el usuario y cifra su contraseña
+            
+            # Asignación automática al grupo mediante un mapeo seguro
+            rol_seleccionado = form.cleaned_data.get('rol')
+            
+            mapeo_grupos = {
+                'Entrenador': 'Entrenadores',
+                'Líder de Gimnasio': 'Lideres',
+                'Directivo / Administrador': 'Directivos',
+                # Por seguridad si ya guardan el nombre exacto:
+                'Entrenadores': 'Entrenadores',
+                'Lideres': 'Lideres',
+                'Directivos': 'Directivos',
+            }
+            
+            nombre_grupo = mapeo_grupos.get(rol_seleccionado, rol_seleccionado)
+            grupo = Group.objects.filter(name=nombre_grupo).first()
+            if grupo:
+                user.groups.add(grupo)
+
+            messages.success(request, "¡Cuenta creada exitosamente! Por favor inicia sesión con tus credenciales.")
+            return redirect('login')
+    else:
+        form = RegistroForm()
+    
+    return render(request, 'pokeapp/registro.html', {'form': form})
+
+# ==========================================
+# VALIDACIÓN DE ROLES
+# ==========================================
+
+def es_directivo(user):
+    return user.is_superuser or user.groups.filter(name='Directivos').exists()
+
+def es_lider(user):
+    return user.is_superuser or user.groups.filter(name='Lideres').exists()
+
+def es_entrenador(user):
+    return user.groups.filter(name='Entrenadores').exists()
 
 
 # ==========================================
@@ -195,7 +278,7 @@ def eliminar_entrenador(request, pk):
     if request.method == 'POST':
         entrenador.delete()
         return redirect('entrenadores')
-    return render(request, 'pokeapp/eliminar_entrenador.html', {'entrenador': entrenador})
+    return render(request, 'pokeapp/eliminar_entrenador.html', {'pokemon': entrenador})
 
 
 # ==========================================
@@ -240,26 +323,26 @@ def eliminar_gimnasio(request, pk):
         return redirect('gimnasios')
     return render(request, 'pokeapp/eliminar_gimnasio.html', {'gimnasio': gimnasio})
 
-import random
+
+# ==========================================
+# MINIJUEGO: ADIVINA EL POKÉMON
+# ==========================================
 
 def adivina_pokemon(request):
     pokemon_misterioso = None
     resultado = None
     
-    # Si el usuario envió su intento por el formulario
     if request.method == 'POST':
         intentos = request.POST.get('intento', '').strip().lower()
         nombre_real = request.POST.get('nombre_real', '').lower()
         
         if intentos == nombre_real:
-            resultado = f" ¡Correcto! Era {nombre_real.capitalize()}."
+            resultado = f"¡Correcto! Era {nombre_real.capitalize()}."
         else:
-            resultado = f" Incorrecto. Era {nombre_real.capitalize()}."
+            resultado = f"Incorrecto. Era {nombre_real.capitalize()}."
             
-        # Generamos uno nuevo para seguir jugando
         id_aleatorio = random.randint(1, 151)
     else:
-        # Primer cargue del juego: ID aleatorio
         id_aleatorio = random.randint(1, 151)
 
     try:
